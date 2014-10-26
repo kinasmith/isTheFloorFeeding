@@ -1,0 +1,11 @@
+Git forking notes
+
+https://github.com/kinasmith/isTheFloorFeeding.git
+
+https://help.github.com/articles/fork-a-repo/
+
+
+git remote -v
+
+git remote add upstream
+
