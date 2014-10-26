@@ -1,5 +1,7 @@
 Git forking notes
 
+http://www.itp.danmelancon.com/uncategorized/a-simple-rest-api-to-alert-for-food/
+
 https://github.com/kinasmith/isTheFloorFeeding.git
 
 https://help.github.com/articles/fork-a-repo/
