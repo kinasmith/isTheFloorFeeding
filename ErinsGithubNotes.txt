@@ -1,5 +1,8 @@
 Git forking notes
 
+python -m SimpleHTTPServer
+
+
 http://www.itp.danmelancon.com/uncategorized/a-simple-rest-api-to-alert-for-food/
 
 https://github.com/kinasmith/isTheFloorFeeding.git
