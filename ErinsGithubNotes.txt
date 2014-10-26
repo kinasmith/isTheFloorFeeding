@@ -9,3 +9,14 @@ git remote -v
 
 git remote add upstream
 
+
+git fetch upstream branch
+
+
+http://git-scm.com/book/en/v2/Git-Branching-Remote-Branches
+
+To synchronize your work, you run a git fetch origin command.
+
+git add .
+git commit -m "your commit message"
+git push origin master
