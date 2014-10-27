@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>isTheFloorFeeding</title>
+
+    <script type="text/javascript">
+
+    function getData(info) {
+    	if (info == "food" || info == "type" || info == "amount") {
+    		var request = new XMLHttpRequest();
+    		request.open("GET", '/' + info, true);
+    		request.send( null );
+    		request.onreadystatechange = function() {
+    			showData(request.responseText);
+    			console.log(request.responseText);
+    	}  
+    } else {
+    	alert("please enter 'food' or 'type' or 'amount'!");
+    }
+}
+
+    function showData(response) {
+    	food.innerHTML = response;
+    }
+    </script>
+</head>
+ 
+
+<body>
+
+<h3>Is the Floor Feeding?</h3>
+<div name = "bodyText"> enter 'food', 'type', or 'amount' to find out</div>
+
+<input type="text" id="info" size=8>	
+<span id="food"></span><br>
+<input type="submit" value="submit" onclick="getData(info.value);">
+ 
+</body>
+</html>
