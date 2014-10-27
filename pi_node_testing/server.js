@@ -30,7 +30,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/food', function(request, response) {
-    response.sendStatus(foodBoolean);
+    response.sendStatus("<b>" + foodBoolean + "</b>");
 });
 
 app.get('/type', function(request, response) {
