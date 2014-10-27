@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<script src = "//cdn.jsdelivr.net/p5.js/0.3.8/p5.min.js"></script>
+	<script type = "text/javascript" src = "//cdn.jsdelivr.net/p5.js/0.3.8/addons/p5.dom.js">
+		var text;
+		function setup() {
+			text = createDiv("Sensor Reading");
+			text.position(10, 10);
+			var sensorReading = loadStrings("/data", showData);
+		}
+		function showData(result) {
+			text.html("SensorReading: " + result);
+			text.position(result, 10);
+			var sensorReading = loadStrings("/data", showData);
+		}
+	</script>
+</head>
+<body>
+	this is a webpage
+</body>
+</html>
