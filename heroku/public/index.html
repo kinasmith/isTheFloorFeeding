@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>isTheFloorFeeding</title>
+
+    <script type="text/javascript">
+
+    function getStatus() { //gets the JSON string from /status
+    	
+        var request = new XMLHttpRequest(); //create variable for request
+        request.open("GET", '/status', true); //send GET to URL (true means async)
+        request.send( null ); //close connection
+        request.onreadystatechange = function() { //when it's done, do this
+            if (request.readyState==4 && request.status==200) { //not sure what this does, but it throws an error without it
+                //parse JSON string and set the text of the <span> tags in the HTML
+                var status = JSON.parse(request.responseText); 
+                state.innerHTML = status.state; 
+                type.innerHTML = status.type;
+                amount.innerHTML = status.amount;
+             }
+        }
+    }
+
+    setInterval(getStatus, 1000);
+
+    </script>
+</head>
+ 
+
+<body>
+
+<h1 id="is-the-floor-feeding-a-notification-of-mastication">Is The Floor Feeding: A notification of mastication</h1>
+
+Is there food?   <span id = "state"></span><br>
+How much is there?  <span id = "amount"></span><br>
+What kind is it?  <span id = "type"></span><br>
+
+</body>
+</html>
