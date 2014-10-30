@@ -1,86 +1,67 @@
-/*
-  Repeating Web client
- 
- This sketch connects to a a web server and makes a request
- using a Wiznet Ethernet shield. You can use the Arduino Ethernet shield, or
- the Adafruit Ethernet shield, either one will work, as long as it's got
- a Wiznet Ethernet module on board.
- 
- This example uses DNS, by assigning the Ethernet client with a MAC address,
- IP address, and DNS address.
- 
- Circuit:
- * Ethernet shield attached to pins 10, 11, 12, 13
- 
- created 19 Apr 2012
- by Tom Igoe
- 
- http://arduino.cc/en/Tutorial/WebClientRepeating
- This code is in the public domain.
- 
- */
+ /*
+ modified from 'Repeating Web Client' example by Tom Igoe
+*/
 
 #include <SPI.h>
 #include <Ethernet.h>
 
 // assign a MAC address for the ethernet controller.
-// fill in your address here:
 //02 AA BB CC 00 35
-
 byte mac[] = { 
   0x02, 0xAA, 0xBB, 0xCC, 0x00, 0x35 };
-// fill in an available IP address on your network here,
-//128.122.151.123
 IPAddress ip(128,122,151,123);
-// fill in your Domain Name Server address here:
-IPAddress server(128,122,6,160);  // numeric IP for Google (no DNS)
+char server[] = "http://isthefloorfeeding.herokuapp.com";
 
 // initialize the library instance:
 EthernetClient client;
 
+//create timing variables
 unsigned long lastConnectionTime = 0;          // last time you connected to the server, in milliseconds
 boolean lastConnected = false;                 // state of the connection last time through the main loop
-const unsigned long postingInterval = 1000;  // delay between updates, in milliseconds
-int ledPin = 9;
-float result = 0;
+const unsigned long postingInterval = 5*1000;  // delay between updates, in milliseconds
+
+//create pin assignments
+int statePin = 7;
+int amountPin = A0;
+int typePin = A1;
+int networkStatusLedPin = 8;
+
+//create data holders
+int state = 0;
+int type = 0;
+int amount = 0;
 
 void setup() {
+  pinMode(statePin, INPUT_PULLUP); //set switch input to pullup
+  pinMode(networkStatusLedPin, OUTPUT); //set status led (no implemented yet) to output
   // start serial port:
   Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
-  // give the ethernet module time to boot up:
-  delay(1000);
-  // start the Ethernet connection using a fixed IP address and DNS server:
-  Ethernet.begin(mac, ip);
-  // print the Ethernet board/shield's IP address:
-  Serial.print("My IP address: ");
-  Serial.println(Ethernet.localIP());
+
+  // start the Ethernet connection:
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Failed to configure Ethernet using DHCP");
+    // no point in carrying on, so do nothing forevermore:
+    // try to congifure using IP address instead of DHCP:
+    Ethernet.begin(mac, ip);
+  }
+  delay(1000); //wait for shield to initialize
+  Serial.println("connecting...");
 }
 
 void loop() {
-  if(result > 0) {
-    digitalWrite(ledPin, HIGH);
-  } 
-  else { 
-    digitalWrite(ledPin, LOW);
-  }
+  state = !digitalRead(statePin); //invert switch reading to 0==off
+  amount = map(analogRead(amountPin), 0, 1023, 0, 4); //map analog input
+  type = map(analogRead(typePin), 0, 1023, 0, 3);
 
   // if there's incoming data from the net connection.
   // send it out the serial port.  This is for debugging
   // purposes only:
-  /*
+
   if (client.available()) {
-   char c = client.read();
-   Serial.print(c);
-   }
-   */
-  if (client.available()) {
-    if(client.find("<b>")) {
-      result = client.parseFloat();
-      Serial.println(result);
-    }
+    char c = client.read();
+    Serial.print(c);
   }
+
   // if there's no net connection, but there was one last time
   // through the loop, then stop the client:
   if (!client.connected() && lastConnected) {
@@ -92,7 +73,7 @@ void loop() {
   // if you're not connected, and ten seconds have passed since
   // your last connection, then connect again and send data:
   if(!client.connected() && (millis() - lastConnectionTime > postingInterval)) {
-    httpRequest();
+    httpRequest(state, type, amount);
   }
   // store the state of the connection for next time through
   // the loop:
@@ -100,13 +81,29 @@ void loop() {
 }
 
 // this method makes a HTTP connection to the server:
-void httpRequest() {
+void httpRequest(int _state, int _type, int _amount) {
+  String GETrequest = "GET /";
+  String HTTPtype = " HTTP/1.1\r\n"; 
   // if there's a successful connection:
-  if (client.connect(server, 8080)) {
+  if (client.connect(server, 80)) {
     Serial.println("connecting...");
-    // send the HTTP PUT request:
-    client.println("GET /food");
-    client.println();
+    //send the data to the server using GET requests. 
+    //heroku didn't like println's so I'm using just .print commands
+    //send three GET requests, then close connection
+    client.print(GETrequest+"food/" + _state + HTTPtype);
+    client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
+    client.print("\r\n");
+
+    client.print(GETrequest+"type/" + _type + HTTPtype);
+    client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
+    client.print("\r\n");
+
+    client.print(GETrequest+"amount/" + _amount + HTTPtype);
+    client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
+    client.print("\r\n");
+
+    client.println("Connection: close");
+    // client.println();
     // note the time that the connection was made:
     lastConnectionTime = millis();
   } 
@@ -117,6 +114,18 @@ void httpRequest() {
     client.stop();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
