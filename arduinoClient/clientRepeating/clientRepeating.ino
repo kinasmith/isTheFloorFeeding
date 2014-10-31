@@ -90,7 +90,7 @@ void httpRequest(int _state, int _type, int _amount) {
     //send the data to the server using GET requests. 
     //heroku didn't like println's so I'm using just .print commands
     //send three GET requests, then close connection
-    client.print(GETrequest+"food/" + _state + HTTPtype);
+    client.print(GETrequest+"state/" + _state + HTTPtype);
     client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
     client.print("\r\n");
 
