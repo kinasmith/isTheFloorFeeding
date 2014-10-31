@@ -21,13 +21,14 @@ app.get('/', function(req, res) {
 });
 
 //for each route, respond with a JSON string with that routes current data
-app.get('/food', function(req, res) {
+
+app.get('/state', function(req, res) { //this should be be /state instead to be consistent with the messaging system.
     res.send({
         state: foodState
     });
 });
 //Set the value in that route, and respond with all of the current stored data
-app.get('/food/:state', function(req, res) {
+app.get('/state/:state', function(req, res) {
     foodState = req.params.state;
     sendState(res);
 });
