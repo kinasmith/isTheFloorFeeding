@@ -10,7 +10,9 @@ app.listen(app.get('port'), function() {
 })
 
 
-var foodState, foodType, foodAmount; //create variable for data storage
+var foodState,
+    foodType,
+    foodAmount; //create variable for data storage
 
 //console.log("server started @ 8080"); //confirm server has started
 
@@ -29,8 +31,11 @@ app.get('/state', function(req, res) { //this should be be /state instead to be 
 });
 //Set the value in that route, and respond with all of the current stored data
 app.get('/state/:state', function(req, res) {
-    foodState = req.params.state;
-    sendState(res);
+    foodState = parseInt(req.params.state);
+    var json = JSON.stringify({
+        state: foodState
+    });
+    res.send(json);
 });
 
 app.get('/type', function(req, res) {
@@ -39,30 +44,32 @@ app.get('/type', function(req, res) {
     });
 });
 app.get('/type/:type', function(req, res) {
-    foodType = req.params.type;
-    sendState(res);
+    foodType = parseInt(req.params.type);
+    var json = JSON.stringify({
+        type: foodType
+    });
+    res.send(json);
 });
 
 app.get('/amount', function(req, res) {
-    res.send({
+    res.json({
         amount: foodAmount
     });
 
 });
 app.get('/amount/:amount', function(req, res) {
-    foodAmount = req.params.amount;
-    sendState(res);
+    foodAmount = parseInt(req.params.amount);
+    var json = JSON.stringify({
+        amount: foodAmount
+    });
+    res.send(json);
 });
 //Send out all the data. (this is redundant, I know.)
 app.get('/status', function(req, res) {
-    sendState(res);
-})
-
-//sends the chunk of JSON that includes the state of all the stored data
-function sendState(data) {
-    data.send({
+    var json = JSON.stringify({
         state: foodState,
         type: foodType,
         amount: foodAmount
     });
-}
+    res.send(json);
+})

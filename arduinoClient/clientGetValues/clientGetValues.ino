@@ -1,9 +1,12 @@
- /*
+/*
  modified from 'Repeating Web Client' example by Tom Igoe
-*/
+ */
 
 #include <SPI.h>
 #include <Ethernet.h>
+#include <JsonParser.h>
+
+using namespace ArduinoJson::Parser;
 
 // assign a MAC address for the ethernet controller.
 //02 AA BB CC 00 35
@@ -21,19 +24,19 @@ boolean lastConnected = false;                 // state of the connection last t
 const unsigned long postingInterval = 5*1000;  // delay between updates, in milliseconds
 
 //create pin assignments
-int statePin = 7;
-int amountPin = A0;
-int typePin = A1;
-int networkStatusLedPin = 8;
 
 //create data holders
 int state = 0;
 int type = 0;
 int amount = 0;
 
+
+String response = "";
+bool begin = false;
+
 void setup() {
-  pinMode(statePin, INPUT_PULLUP); //set switch input to pullup
-  pinMode(networkStatusLedPin, OUTPUT); //set status led (no implemented yet) to output
+  pinMode(9, OUTPUT);
+  digitalWrite(9, LOW);
   // start serial port:
   Serial.begin(9600);
 
@@ -49,17 +52,28 @@ void setup() {
 }
 
 void loop() {
-  state = !digitalRead(statePin); //invert switch reading to 0==off
-  amount = map(analogRead(amountPin), 0, 1023, 0, 4); //map analog input
-  type = map(analogRead(typePin), 0, 1023, 0, 3);
-
+  digitalWrite(9, state);
   // if there's incoming data from the net connection.
   // send it out the serial port.  This is for debugging
   // purposes only:
-
+  /*
   if (client.available()) {
-    char c = client.read();
-    Serial.print(c);
+   char c = client.read();
+   Serial.print(c);
+   }
+   */
+  if(client.available() || !begin) {
+    char in = client.read();
+    if (in == '{') {
+      begin = true;
+    }
+    if (begin) response += (in);
+    if (in == '}') {
+      begin = false;
+      parseJSON(response);
+      Serial.print(response); 
+      response = "";
+    }
   }
 
   // if there's no net connection, but there was one last time
@@ -73,7 +87,7 @@ void loop() {
   // if you're not connected, and ten seconds have passed since
   // your last connection, then connect again and send data:
   if(!client.connected() && (millis() - lastConnectionTime > postingInterval)) {
-    httpRequest(state, type, amount);
+    httpRequest();
   }
   // store the state of the connection for next time through
   // the loop:
@@ -81,7 +95,7 @@ void loop() {
 }
 
 // this method makes a HTTP connection to the server:
-void httpRequest(int _state, int _type, int _amount) {
+void httpRequest() {
   String GETrequest = "GET /";
   String HTTPtype = " HTTP/1.1\r\n"; 
   // if there's a successful connection:
@@ -90,20 +104,10 @@ void httpRequest(int _state, int _type, int _amount) {
     //send the data to the server using GET requests. 
     //heroku didn't like println's so I'm using just .print commands
     //send three GET requests, then close connection
-    client.print(GETrequest+"state/" + _state + HTTPtype);
+    client.print(GETrequest+"status" + HTTPtype);
     client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
     client.print("\r\n");
-
-    client.print(GETrequest+"type/" + _type + HTTPtype);
-    client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
-    client.print("\r\n");
-
-    client.print(GETrequest+"amount/" + _amount + HTTPtype);
-    client.print("Host: isthefloorfeeding.herokuapp.com\r\n");
-    client.print("\r\n");
-
     client.println("Connection: close");
-    // client.println();
     // note the time that the connection was made:
     lastConnectionTime = millis();
   } 
@@ -115,16 +119,31 @@ void httpRequest(int _state, int _type, int _amount) {
   }
 }
 
+void parseJSON(String json) {
+  char charBuf[json.length()+1];
+  json.toCharArray(charBuf, json.length()+1);
+  
+  JsonParser<16> parser;
+  JsonObject root = parser.parse(charBuf); 
+
+  if (!root.success())
+  {
+    Serial.println("JsonParser.parse() failed");
+    return;
+  }
+
+  long _state  = root["state"];
+  long _type = root["type"];
+  long _amount = root["amount"];
+  state = _state;
+  type = _type;
+  amount = _amount;
+  Serial.println(_state);
+  Serial.println(_type);
+  Serial.println(_amount);
 
 
-
-
-
-
-
-
-
-
+}
 
 
 
