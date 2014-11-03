@@ -29,7 +29,7 @@ int sweetLEDPin = 6;
 int savoryLEDPin = 7;
 int stateLEDPin = 8;
 
-int stateReadPin = 12;
+int stateReadPin = 9;
 
 int amountReadPin = A0;
 int typeReadPin = A1;
@@ -63,26 +63,25 @@ void setup() {
 
   Serial.begin(9600);
 
-  while (!Serial); // wait for a serial connection
+  // while (!Serial); // wait for a serial connection
 
 }
 
 void loop() {
+  state = !digitalRead(stateReadPin);
+  typeIN = map(analogRead(typeReadPin), 0, 1000, -256, 255);
+  amount = map(analogRead(amountReadPin), 0, 1000, 0, 5); 
   
-  state = !digitalRead(stateReadPin); //invert switch reading to 0==off
-  digitalWrite(stateLEDPin, state);
+  if (state == 1) {
+    setState(state);
+    setType(typeIN);
+    setAmount(amount);
+  } else {
+    setState(0);
+    setType(0);
+    setAmount(0);
+  }
 
-  typeIN = explin(analogRead(typeReadPin), 0.1, 1000, -256, 255);
-  setType(typeIN);
-  // type = analogRead(typeReadPin);
-
-  amount = explin(analogRead(amountReadPin), 0.1, 800, 0, 4); //map analog input
-  setAmount(amount);
-   //amount = analogRead(amountReadPin);
-
-state = random(0, 100);
-type = random(0, 100);
-amount = random(0, 100);
   // Initialize the client library
   HttpClient client;
   stateURL = "http://isthefloorfeeding.herokuapp.com/state/";
@@ -105,18 +104,15 @@ amount = random(0, 100);
   }
   Serial.flush();
   Serial.println();
-  
+
   Serial.println(state);
   Serial.println(amount);
   Serial.println(type);
   delay(1000);
 }
 
-float explin (float x, float a, float b, float c, float d)
-{
-  if (x <= a) return c;
-  if (x >= b) return d;
-  return (log(x / a)) / (log(b / a)) * (d - c) + c;
+void setState(int input) {
+  digitalWrite(stateLEDPin, input);
 }
 
 void setAmount(int input) {
@@ -135,7 +131,7 @@ void setType(int input) {
     digitalWrite(sweetLEDPin, LOW);
     digitalWrite(savoryLEDPin, HIGH);
     type = 1;
-  } else if (input < -50) {
+  } else if (input < -100) {
     digitalWrite(sweetLEDPin, HIGH);
     digitalWrite(savoryLEDPin, LOW);
     type = 2;
