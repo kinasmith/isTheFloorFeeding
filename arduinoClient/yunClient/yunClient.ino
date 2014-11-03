@@ -42,9 +42,18 @@ int type = 0;
 int typeIN = 0;
 int amount = 0;
 
+//String stateURL = "http://isthefloorfeeding.herokuapp.com/state/";
 String stateURL = "";
+//String amountURL = "http://isthefloorfeeding.herokuapp.com/amount/";
 String typeURL = "";
+//String typeURL = "http://isthefloorfeeding.herokuapp.com/type/";
 String amountURL = "";
+
+//create timing variables
+unsigned long lastConnectionTime = 0;          // last time you connected to the server, in milliseconds
+boolean lastConnected = false;                 // state of the connection last time through the main loop
+const unsigned long postingInterval = 1000; // delay between updates, in milliseconds
+
 
 void setup() {
   for (int i = amountLED1Pin; i <= stateLEDPin; i++) {
@@ -70,8 +79,8 @@ void setup() {
 void loop() {
   state = !digitalRead(stateReadPin);
   typeIN = map(analogRead(typeReadPin), 0, 1000, -256, 255);
-  amount = map(analogRead(amountReadPin), 0, 1000, 0, 5); 
-  
+  amount = map(analogRead(amountReadPin), 0, 1000, 0, 5);
+
   if (state == 1) {
     setState(state);
     setType(typeIN);
@@ -91,24 +100,27 @@ void loop() {
   amountURL = "http://isthefloorfeeding.herokuapp.com/amount/";
   amountURL += amount;
   // Make a HTTP request:
-  client.get(stateURL);
-  client.get(typeURL);
-  client.get(amountURL);
-
-
-  // if there are incoming bytes available
-  // from the server, read them and print them:
-  while (client.available()) {
-    char c = client.read();
-    Serial.print(c);
+  if (millis() - lastConnectionTime > postingInterval) {
+    digitalWrite(13, HIGH);
+    client.get(stateURL);
+    client.get(typeURL);
+    client.get(amountURL);
+    digitalWrite(13, LOW);
+    Serial.println();
+    Serial.println(state);
+    Serial.println(amount);
+    Serial.println(type);
+    // if there are incoming bytes available
+    // from the server, read them and print them:
+    while (client.available()) {
+      char c = client.read();
+      Serial.print(c);
+    }
+    Serial.flush();
+    lastConnectionTime = millis();
   }
-  Serial.flush();
-  Serial.println();
 
-  Serial.println(state);
-  Serial.println(amount);
-  Serial.println(type);
-  delay(1000);
+  //  delay(1000);
 }
 
 void setState(int input) {
