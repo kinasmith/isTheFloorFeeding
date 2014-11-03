@@ -71,9 +71,16 @@ void setup() {
 }
 
 void loop() {
-  setState(state);
-  setType(type);
-  setAmount(amount);
+  if(state != 0) {
+    setState(state);
+    setType(type);
+    setAmount(amount);
+  } 
+  else {
+    setState(0);
+    setType(0);
+    setAmount(0);
+  }
 
   // if there's incoming data from the net connection.
   // send it out the serial port.  This is for debugging
@@ -203,6 +210,7 @@ void setAmount(int input) {
     }
   } 
 }
+
 
 
 
