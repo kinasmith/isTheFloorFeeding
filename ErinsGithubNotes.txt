@@ -1,0 +1,27 @@
+Git forking notes
+
+python -m SimpleHTTPServer
+
+
+http://www.itp.danmelancon.com/uncategorized/a-simple-rest-api-to-alert-for-food/
+
+https://github.com/kinasmith/isTheFloorFeeding.git
+
+https://help.github.com/articles/fork-a-repo/
+
+
+git remote -v
+
+git remote add upstream
+
+
+git fetch upstream branch
+
+
+http://git-scm.com/book/en/v2/Git-Branching-Remote-Branches
+
+To synchronize your work, you run a git fetch origin command.
+
+git add .
+git commit -m "your commit message"
+git push origin master
